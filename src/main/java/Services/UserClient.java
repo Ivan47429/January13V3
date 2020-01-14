@@ -2,6 +2,9 @@ package Services;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import model.PostLoginUserRequestBody;
+import model.PostUserRequestBody;
+import model.UpdateUserRequestBody;
 import util.Payload;
 
 import java.net.URISyntaxException;
@@ -22,23 +25,23 @@ public class UserClient extends BaseClient {
                 .get("/api/users/5");
     }
 
-    public Response createUser() {
+    public Response createUser(PostUserRequestBody requestBody) {
         return RestAssured
                 .given()
                 .spec(requestSpecification())
                 .baseUri(baseUri)
                 .contentType("application/json")
-                .body(Payload.bodyForCreatingUser())
+                .body(requestBody)
                 .post("api/users");
         //ne go prakja body-to ???????
     }
 
-    public Response updateUser() {
+    public Response updateUser(UpdateUserRequestBody requestBody) {
         return RestAssured
                 .given()
                 .spec(requestSpecification())
                 .contentType("application/json")
-                .body(Payload.bodyForUpdatingUser())
+                .body(requestBody)
                 .baseUri(baseUri)
                 .patch("api/users/2");
     }
@@ -52,22 +55,22 @@ public class UserClient extends BaseClient {
     }
 
 
-    public Response loginUser() {
+    public Response loginUser(PostLoginUserRequestBody requestBody) {
         return RestAssured
                 .given()
                 .spec(requestSpecification())
                 .contentType("application/json")
-                .body(Payload.bodyForLogInUser())
+                .body(requestBody)
                 .baseUri(baseUri)
                 .post("api/login");
     }
 
-    public Response unsuccessfulLoginUser(){
+    public Response unsuccessfulLoginUser(PostLoginUserRequestBody requestBody){
         return RestAssured
                 .given()
                 .spec(requestSpecification())
                 .contentType("application/json")
-                .body(Payload.unsuccessfulLoginUser())
+                .body(requestBody)
                 .baseUri(baseUri)
                 .post("api/login");
     }

@@ -2,13 +2,18 @@ package Test;
 
 import Services.UserClient;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import model.PostLoginUserRequestBody;
+import model.PostUserRequestBody;
+import model.UpdateUserRequestBody;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.net.URISyntaxException;
 
+import static org.apache.http.HttpStatus.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -30,52 +35,67 @@ public class Tests {
 
     @Test
     public void isNewUserSuccessfullyCreated() {
-        userClient.createUser()
-                .then().statusCode(201)
-                .and().contentType(ContentType.JSON)
-                .body(containsString("Morfi"));
+        userClient.createUser(new PostUserRequestBody()
+                .setName("Filip")
+                .setJob("QA"))
+                .then().statusCode(SC_CREATED)
+                .and().body(containsString("Filip"));
+// old school kako sto ne treba        userClient.createUser()
+//                .then().statusCode(201)
+//                .and().contentType(ContentType.JSON)
+//                .body(containsString("Morfi"));
     }
 
     @Test
     public void isNewUserRetrieved() {
         Response response = userClient.retrieveUser();
-        response.then().extract().path("data");
-        assertThat(1, equalTo(1));
+        String responseAsString = response.then().extract().asString();
+        JsonPath jsp = new JsonPath(responseAsString);
+        assertThat(jsp.get("first_name"), equalTo("Charles"));
+
     }
 
     @Test
     public void isUserUpdated() {
-        userClient.updateUser()
-                .then().statusCode(200)
+        userClient.updateUser(new UpdateUserRequestBody()
+                .setName("Filip II").setJob("Senior QA"))
+                .then().statusCode(SC_OK)
                 .and().contentType(ContentType.JSON)
-                .body(containsString("MORFImorpheus"));
+                .body(containsString("Filip II"));
 
     }
 
     @Test
     public void deleteUser() {
         userClient.deleteUser()
-                .then().statusCode(204);
+                .then().statusCode(SC_NO_CONTENT);
     }
 
     @Test
     public void successfullyLogInUser() {
-        userClient.loginUser().
-                then().statusCode(200);
+        userClient.loginUser(new PostLoginUserRequestBody()
+                .setEmail("eve.holt@reqres.in").setPassword("cityslicka")).
+                then().statusCode(SC_OK);
+
+
     }
 
     @Test
     public void unsuccessfulLogin() {
-        userClient.unsuccessfulLoginUser()
-                .then().statusCode(400);
+        userClient.unsuccessfulLoginUser(new PostLoginUserRequestBody() //I'm using the same object model as successfullyLogedInUser
+                .setEmail("eve.holt@reqres.in"))
+                .then().statusCode(SC_BAD_REQUEST);
     }
 
     @Test
     public void canGetListOfUsers() {
         userClient.getListOfUsers()
-                .then().statusCode(200);
+                .then().statusCode(SC_OK);
 
     }
+
+    //Tasks: create xml file to run all the tests at once, deserialize all the JSON response and put assertions on them
+    //do all the reading required
 
 
 }
