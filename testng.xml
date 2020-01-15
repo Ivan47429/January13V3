@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="All Test Suite">
+    <test verbose="2" preserve-order="true"
+          name="C:/Users/iargirovski/IdeaProjects/January13V3/src/test/java/Test/Tests.java">
+        <classes>
+            <class name="Test.Tests">
+                <methods>
+                    <include name="isNewUserSuccessfullyCreated"/>
+                    <include name="isNewUserRetrieved"/>
+                    <include name="isUserUpdated"/>
+                    <include name="deleteUser"/>
+                    <include name="successfullyLogInUser"/>
+                    <include name="unsuccessfulLogin"/>
+                    <include name="canGetListOfUsers"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

@@ -1,13 +1,12 @@
 package Test;
 
+import Services.ReusableMethods;
 import Services.UserClient;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import model.PostLoginUserRequestBody;
-import model.PostUserRequestBody;
-import model.UpdateUserRequestBody;
+import model.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -35,11 +34,16 @@ public class Tests {
 
     @Test
     public void isNewUserSuccessfullyCreated() {
-        userClient.createUser(new PostUserRequestBody()
+        PostUserResponseBody UserCreatedFilip = userClient.createUser(new PostUserRequestBody()
                 .setName("Filip")
                 .setJob("QA"))
                 .then().statusCode(SC_CREATED)
-                .and().body(containsString("Filip"));
+                .and().body(containsString("Filip"))
+                .and()
+                .extract().as(PostUserResponseBody.class);
+
+        assertThat(UserCreatedFilip.getName(),equalTo("Filip"));
+        assertThat(UserCreatedFilip.getJob(),equalTo("QA"));
 // old school kako sto ne treba        userClient.createUser()
 //                .then().statusCode(201)
 //                .and().contentType(ContentType.JSON)
@@ -48,21 +52,32 @@ public class Tests {
 
     @Test
     public void isNewUserRetrieved() {
-        Response response = userClient.retrieveUser();
-        String responseAsString = response.then().extract().asString();
-        JsonPath jsp = new JsonPath(responseAsString);
-        assertThat(jsp.get("first_name"), equalTo("Charles"));
+        Response response = userClient.retrieveUser()
+                .then().statusCode(SC_OK)
+                .and()
+                .extract().response();
+
+        JsonPath a = ReusableMethods.responseAsJsonPath(response);
+
+        assertThat(a.get("data.first_name"), equalTo("Charles"));
+        assertThat(a.get("data.last_name"),equalTo("Morris"));
+        assertThat(a.get("data.id"), equalTo(5));
 
     }
 
     @Test
     public void isUserUpdated() {
-        userClient.updateUser(new UpdateUserRequestBody()
+        UpdateUserResponseBody UserFilipII =
+                 userClient.updateUser(new UpdateUserRequestBody()
                 .setName("Filip II").setJob("Senior QA"))
                 .then().statusCode(SC_OK)
                 .and().contentType(ContentType.JSON)
-                .body(containsString("Filip II"));
+                .body(containsString("Filip II"))
+                .and()
+                .extract().as(UpdateUserResponseBody.class);
 
+                assertThat(UserFilipII.getJob(),equalTo("Senior QA"));
+                assertThat(UserFilipII.getName(),containsString("Fil"));
     }
 
     @Test
@@ -73,9 +88,12 @@ public class Tests {
 
     @Test
     public void successfullyLogInUser() {
-        userClient.loginUser(new PostLoginUserRequestBody()
+         PostLoginUserResponse TokenObj = userClient.loginUser(new PostLoginUserRequestBody()
                 .setEmail("eve.holt@reqres.in").setPassword("cityslicka")).
-                then().statusCode(SC_OK);
+                then().statusCode(SC_OK)
+                .and()
+                .extract().as(PostLoginUserResponse.class);
+         assertThat(TokenObj.getToken(),equalTo("QpwL5tke4Pnpja7X4"));
 
 
     }
@@ -89,19 +107,29 @@ public class Tests {
 
     @Test
     public void canGetListOfUsers() {
-        userClient.getListOfUsers()
-                .then().statusCode(SC_OK);
+       Response res= userClient.getListOfUsers()
+                .then().statusCode(SC_OK)
+               .and().extract().response();
+       JsonPath jsp =ReusableMethods.responseAsJsonPath(res);
+
+       assertThat(jsp.get("data[0].first_name"),equalTo("Michael"));
+       assertThat(jsp.get("data[4].id"),equalTo(11));
+       assertThat(jsp.get("page"),equalTo(2));
+
 
     }
 
-    //make a git branch
-    //Tasks: create xml file to run all the tests at once, deserialize all the JSON response and put assertions on them
+
+
+   
     //do all the reading required
     //Base client, constructor etc
     //create property files
     //Trello update
+    //step by step what to do
+    //make a git comands
     //recreate framework
-    //sdfdsfsdfdsfsd
+
 
 
 }
