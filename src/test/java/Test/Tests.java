@@ -94,8 +94,14 @@ public class Tests {
 
     }
 
+    //make a git branch
     //Tasks: create xml file to run all the tests at once, deserialize all the JSON response and put assertions on them
     //do all the reading required
+    //Base client, constructor etc
+    //create property files
+    //Trello update
+    //recreate framework
+    //sdfdsfsdfdsfsd
 
 
 }
